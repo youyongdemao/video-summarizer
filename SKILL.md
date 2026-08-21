@@ -30,6 +30,8 @@ When triggered, the agent should:
    python D:\AI\Hanako\skills\video-summarizer\scripts\video-summary.py <video-url>
    # 高精度 turbo 模型（慢，~1.5GB，识别率最高）
    python D:\AI\Hanako\skills\video-summarizer\scripts\video-summary.py <video-url> turbo
+   # 反爬平台（B站/抖音/YouTube 等）带 cookies 文件
+   python D:\AI\Hanako\skills\video-summarizer\scripts\video-summary.py <video-url> --cookies cookies.txt
    ```
    This handles platform detection (Bilibili needs custom Referer header), subtitle extraction, audio download, and Whisper transcription.
 
@@ -41,10 +43,20 @@ When triggered, the agent should:
    - **关键要点** (numbered, each with brief explanation)
    - **值得注意的细节/金句** (if any)
 
+## Cookies 注意事项（重要）
+
+大多数主流平台（B站、YouTube、抖音、TikTok、小红书、Vimeo 等）现在需要 cookies 才能通过反爬。脚本会：
+1. 优先使用 `--cookies cookies.txt` 显式传入的 Netscape 格式 cookies 文件
+2. 没有显式文件时自动探测 Chrome / Edge / Firefox 浏览器 cookies（`yt-dlp --cookies-from-browser`）
+
+注意：新版 Chrome/Edge 的加密 cookie 常导致 `--cookies-from-browser` 提取失败（DPAPI 报错），所以遇到反爬失败时，优先准备 cookies.txt 文件：
+- 浏览器装 "Get cookies.txt LOCALLY" 类扩展，登录目标平台后导出
+- 传参：`python video-summary.py <url> --cookies cookies.txt`
+
 ## Environment Status
 
 All dependencies are installed and ready:
-- `yt-dlp` - installed, working (Bilibili with Referer header, YouTube with default config)
+- `yt-dlp` (2026.08.19) - installed, working
 - `ffmpeg` - globally available in PATH
 - `openai-whisper` (v20250625) - installed, `base` model cached at 138.5 MB
 - Python script at `D:\AI\Hanako\skills\video-summarizer\scripts\video-summary.py`

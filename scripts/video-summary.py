@@ -42,26 +42,65 @@ def run_cmd(cmd, timeout=600, stderr_ok=True):
 def detect_platform(url):
     """Detect video platform from URL."""
     url_lower = url.lower()
+    # 国内主流
     if "bilibili.com" in url_lower or "b23.tv" in url_lower:
         return "bilibili"
-    if "youtube.com" in url_lower or "youtu.be" in url_lower:
-        return "youtube"
     if "douyin.com" in url_lower or "v.douyin.com" in url_lower or "iesdouyin.com" in url_lower:
         return "douyin"
     if "xiaohongshu.com" in url_lower or "xhslink.com" in url_lower:
         return "xiaohongshu"
     if "weibo.com" in url_lower:
         return "weibo"
+    if "v.qq.com" in url_lower or "qq.com" in url_lower:
+        return "tencent"
+    if "iqiyi.com" in url_lower or "iq.com" in url_lower:
+        return "iqiyi"
+    if "youku.com" in url_lower:
+        return "youku"
+    if "mgtv.com" in url_lower:
+        return "mgtv"
+    if "ixigua.com" in url_lower:
+        return "ixigua"
+    if "kuaishou.com" in url_lower or "gifshow.com" in url_lower:
+        return "kuaishou"
+    if "tv.sohu.com" in url_lower or "sohu.com" in url_lower:
+        return "sohu"
+    # 海外主流
+    if "youtube.com" in url_lower or "youtu.be" in url_lower:
+        return "youtube"
+    if "tiktok.com" in url_lower or "vm.tiktok" in url_lower:
+        return "tiktok"
+    if "vimeo.com" in url_lower:
+        return "vimeo"
+    if "twitch.tv" in url_lower:
+        return "twitch"
+    if "twitter.com" in url_lower or "x.com" in url_lower or "t.co" in url_lower:
+        return "twitter"
+    if "instagram.com" in url_lower or "instagr.am" in url_lower:
+        return "instagram"
+    if "facebook.com" in url_lower or "fb.watch" in url_lower:
+        return "facebook"
+    if "netflix.com" in url_lower:
+        return "netflix"
     return "generic"
 
 
 _cookie_args_cache = None
+_cookies_file = None
+
+def set_cookies_file(path):
+    """Set an explicit Netscape-format cookies file (highest priority)."""
+    global _cookies_file
+    _cookies_file = path
 
 def get_cookie_args():
-    """Try to extract cookies from browsers, return yt-dlp cookie args.
+    """Return yt-dlp cookie args.
 
-    Result is cached so the (slow) browser probe only runs once per process.
+    Priority: explicit --cookies file > browser probe (cached).
+    Browser probe is slow, so its result is cached per process.
     """
+    if _cookies_file:
+        return ["--cookies", _cookies_file]
     global _cookie_args_cache
     if _cookie_args_cache is not None:
         return _cookie_args_cache
@@ -84,8 +123,12 @@ def get_platform_args(platform):
 
     Bilibili needs a Referer header; Douyin/TikTok and other anti-scraping
     platforms need browser cookies (fresh anonymous cookies get rejected).
+    Domestic (CN) video sites generally accept no extra args for free content.
     """
-    cookie_needing = {"douyin", "tiktok", "twitter", "instagram", "facebook", "netflix", "kuaishou"}
+    cookie_needing = {
+        "douyin", "tiktok", "twitter", "instagram", "facebook",
+        "netflix", "kuaishou", "xiaohongshu", "weibo",
+    }
     if platform == "bilibili":
         return get_cookie_args(), ["--referer", "https://www.bilibili.com/"]
     if platform in cookie_needing:
@@ -237,13 +280,25 @@ def main():
     # Parse arguments
     url = None
     model_name = "turbo"
-    for arg in sys.argv[1:]:
-        if arg == "--model":
+    i = 1
+    while i < len(sys.argv):
+        arg = sys.argv[i]
+        if arg == "--model" and i + 1 < len(sys.argv):
+            i += 2
+            continue
+        if arg == "--cookies" and i + 1 < len(sys.argv):
+            cookies_path = sys.argv[i + 1]
+            if not os.path.exists(cookies_path):
+                print(json.dumps({"error": f"Cookies file not found: {cookies_path}"}, ensure_ascii=False))
+                sys.exit(1)
+            set_cookies_file(cookies_path)
+            i += 2
             continue
         if arg in ("base", "turbo", "small", "medium", "large"):
             model_name = arg
         elif not url:
             url = arg
+        i += 1
 
     if not url:
         print(json.dumps({"error": "No URL provided"}, ensure_ascii=False))
