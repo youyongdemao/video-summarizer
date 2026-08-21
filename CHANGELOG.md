@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.1 - 2026-08-21
+
+### 新增
+
+- 仓库新增 `CHANGELOG.md`：内置变更日志，与 GitHub Release notes 同步（Keep a Changelog 风格）
+
 ## v1.1.0 - 2026-08-21
 
 ### 新增
