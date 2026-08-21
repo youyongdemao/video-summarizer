@@ -2,7 +2,7 @@
 
 一键总结视频内容。丢一个视频链接进来，自动提取字幕 / 转录音频，输出结构化摘要数据供 AI Agent 整理成最终总结。
 
-一个为 AI 助手（HanaAgent 等）设计的 Hana skill：`SKILL.md` 描述触发条件与工作流，`scripts/video-summary.py` 负责下载与转录。
+一个为 AI 助手（DSharness、HanaAgent、workbuddy等）设计的 agent skill：`SKILL.md` 描述触发条件与工作流，`scripts/video-summary.py` 负责下载与转录。
 
 ## 功能
 
