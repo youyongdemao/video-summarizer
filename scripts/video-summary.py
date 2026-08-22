@@ -20,7 +20,6 @@ import os
 import subprocess
 import sys
 import tempfile
-import time
 from pathlib import Path
 
 
@@ -140,10 +139,6 @@ def try_get_subtitles(url, platform, work_dir):
     """Try to download subtitles. Returns path to subtitle file or None."""
     cookie_args, extra_args = get_platform_args(platform)
 
-    # For YouTube, prefer auto-subs
-    sub_lang = "--write-auto-subs" if platform == "youtube" else "--write-subs"
-    sub_format = "--sub-format" 
-    
     cmd = [
         "yt-dlp", "--no-update",
         "--skip-download",
@@ -284,6 +279,7 @@ def main():
     while i < len(sys.argv):
         arg = sys.argv[i]
         if arg == "--model" and i + 1 < len(sys.argv):
+            model_name = sys.argv[i + 1]
             i += 2
             continue
         if arg == "--cookies" and i + 1 < len(sys.argv):
@@ -350,16 +346,7 @@ def main():
         duration_min = metadata["duration"] // 60
         duration_sec = metadata["duration"] % 60
 
-        summary_prompt = f"""视频标题：{metadata['title']}
-UP主/频道：{metadata['uploader']}
-时长：{duration_min}分{duration_sec}秒
-平台：{platform}
-
-以下是视频的文字内容（来自{'字幕' if sub_path else 'Whisper语音转录'}）：
-
-{transcript if transcript else '(未能获取内容)'}
-
-请根据以上内容生成一份结构化的视频总结。"""
+        summary_prompt = f"""视频标题：{metadata['title']}\nUP主/频道：{metadata['uploader']}\n时长：{duration_min}分{duration_sec}秒\n平台：{platform}\n\n以下是视频的文字内容（来自{'字幕' if sub_path else 'Whisper语音转录'}）：\n\n{transcript if transcript else '(未能获取内容)'}\n\n请根据以上内容生成一份结构化的视频总结。"""
 
         output = {
             "transcript": transcript or "",
