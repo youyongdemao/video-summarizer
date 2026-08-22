@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.2.0 - 2026-08-22
+
+### 新增
+
+- SKILL.md 补全 `description` 字段（修复技能在 HanaAgent 可用技能列表中不显示的问题，兼容 DSharness/HanaAgent/workbuddy 等多 agent 框架）
+
+### 优化
+
+- SKILL.md 移除硬编码绝对路径（`D:\AI\Hanako\skills\...`），脚本改为相对本 SKILL.md 定位，跨机器 / 跨 agent 框架可用
+- 统一默认模型说明：SKILL.md 原写“默认 base”，脚本实际默认 turbo，已对齐为 turbo
+
+### 修复
+
+- 修复 `--model` 参数解析：原逻辑会跳过模型名导致设置失效，现正确读取
+- 清理未使用变量与 import（`sub_lang`、`sub_format`、`time`）
+
 ## v1.1.1 - 2026-08-21
 
 ### 新增
